@@ -1,0 +1,5 @@
+capricorn:
+  server:
+    ip: xxx.xxx.xxx.xxx
+    port: 9999
+

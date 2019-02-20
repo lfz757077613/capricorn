@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: '@deploy.type@'
+# 输出日志支持彩色
+  output:
+    ansi:
+      enabled: always
+
+capricorn:
+  reconnectPeriod:
+    seconds: 10
+  directMemReporterPeriod:
+    seconds: 10
+  heartBeatPeriod:
+    seconds: 20

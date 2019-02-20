@@ -1,0 +1,38 @@
+spring:
+  profiles:
+    active: '@deploy.type@'
+# 输出日志支持彩色
+  output:
+    ansi:
+      enabled: always
+# 不使用boot的绿叶favicon
+  mvc:
+    favicon:
+      enabled: false
+# boot默认开启CharacterEncodingFilter
+  http:
+    encoding:
+      force: true
+
+# 内置tomcat的配置，默认不开启accesslog
+server:
+  port: 9998
+  tomcat:
+    uri-encoding: utf-8
+    protocol-header: X-Forwarded-Proto
+    protocol-header-https-value: https
+    remote-ip-header: X-Forwarded-For
+    accesslog:
+      pattern: "%{X-Real-IP}i %l %u %t %r %s %b"
+      enabled: true
+
+# 自定义配置，capricorn开头
+capricorn:
+  directMemReporterPeriod:
+    seconds: 10
+  server:
+    port: 9999
+  dead:
+   seconds: 600
+  qqNotify:
+    seconds: 1800
