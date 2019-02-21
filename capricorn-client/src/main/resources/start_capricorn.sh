@@ -7,6 +7,3 @@ if [ -n "$CAPRICORN_PID" ] ; then
     exit 2;
 fi
 nohup java -jar /root/capricorn-client-1.0-SNAPSHOT.jar > /dev/null 2>&1 &
-
-
-python main.py -e 'chmod 777 /root/start_capricorn.sh'
