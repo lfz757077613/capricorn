@@ -73,13 +73,8 @@ public class NettyClient {
     @Resource
     private ExceptionHandler exceptionHandler;
 
-    @PreDestroy
-    public void destroy() {
-        Runtime.getRuntime().addShutdownHook(new Thread(bootstrap.config().group()::shutdownGracefully));
-    }
-
     public NettyClient() {
-        this.bootstrap = new Bootstrap().group(new NioEventLoopGroup())
+        bootstrap = new Bootstrap().group(new NioEventLoopGroup())
             .channel(NioSocketChannel.class)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
             .option(ChannelOption.TCP_NODELAY, true)
@@ -99,6 +94,7 @@ public class NettyClient {
                     p.addLast(exceptionHandler);
                 }
             });
+        Runtime.getRuntime().addShutdownHook(new Thread(bootstrap.config().group()::shutdownGracefully));
     }
 
     // 连接超时时间小于重试时间或者重复调用会引发多次连接

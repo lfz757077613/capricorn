@@ -66,12 +66,6 @@ public class NettyServer {
     @Resource
     private ExceptionHandler exceptionHandler;// 放在最后
 
-    @PreDestroy
-    public void destroy() {
-        Runtime.getRuntime().addShutdownHook(new Thread(serverBootstrap.config().group()::shutdownGracefully));
-        Runtime.getRuntime().addShutdownHook(new Thread(serverBootstrap.config().childGroup()::shutdownGracefully));
-    }
-
     public NettyServer() {
         //只监听一个端口，bossGroup只设置一个线程就可以
         serverBootstrap = new ServerBootstrap().group(new NioEventLoopGroup(1), new NioEventLoopGroup())
@@ -93,6 +87,10 @@ public class NettyServer {
                         p.addLast(exceptionHandler);
                     }
                 });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            serverBootstrap.config().group().shutdownGracefully();
+            serverBootstrap.config().childGroup().shutdownGracefully();
+        }));
     }
 
     public synchronized void bind() {
