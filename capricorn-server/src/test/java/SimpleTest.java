@@ -1,8 +1,3 @@
-import org.junit.Test;
-
-import java.io.File;
-import java.net.URL;
-
 /**
  * Author: fuzhi.lai
  * Date: 2019/2/18 下午2:23
@@ -33,13 +28,4 @@ import java.net.URL;
 */
 public class SimpleTest {
 
-    @Test
-    public void simpleTest() {
-        URL filePath = getClass().getResource(File.separator + "client-config.properties");
-        String path = filePath.getPath();
-        System.out.println(path);
-        File file = new File(path);
-        System.out.println(file.exists());
-
-    }
 }

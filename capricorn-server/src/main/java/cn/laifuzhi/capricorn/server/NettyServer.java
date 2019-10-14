@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 /**
@@ -65,13 +66,18 @@ public class NettyServer {
     @Resource
     private ExceptionHandler exceptionHandler;// 放在最后
 
+    @PreDestroy
+    public void destroy() {
+        Runtime.getRuntime().addShutdownHook(new Thread( serverBootstrap.config().group()::shutdownGracefully));
+        Runtime.getRuntime().addShutdownHook(new Thread( serverBootstrap.config().childGroup()::shutdownGracefully));
+
+
+    }
 
     public NettyServer() {
         //只监听一个端口，bossGroup只设置一个线程就可以
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
         serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup)
+        serverBootstrap.group( new NioEventLoopGroup(1), new NioEventLoopGroup())
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .childOption(ChannelOption.TCP_NODELAY, true)

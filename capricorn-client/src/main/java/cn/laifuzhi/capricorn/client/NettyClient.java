@@ -18,11 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
 
 /**
  * Author: fuzhi.lai
@@ -73,30 +73,32 @@ public class NettyClient {
     @Resource
     private ExceptionHandler exceptionHandler;
 
+    @PreDestroy
+    public void destroy() {
+        Runtime.getRuntime().addShutdownHook(new Thread(bootstrap.config().group()::shutdownGracefully));
+    }
+
     public NettyClient() {
-        NioEventLoopGroup workGroup = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap().group(new NioEventLoopGroup())
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.SO_RCVBUF, 32 * 1024)
-                .option(ChannelOption.SO_SNDBUF, 32 * 1024)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) {
-                        ChannelPipeline p = ch.pipeline();
-                        // 60s没有服务端数据流入认为连接假死(就是收不到pong)，关闭channel
-                        p.addLast(new ClientIdleHandler(60, 0, 0));
-                        p.addLast(new InputSplitter());
-                        p.addLast(MyMsgCodec.INSTANCE);
-                        p.addLast(heartBeatHandler);
-                        p.addLast(allMsgHandler);
-                        p.addLast(exceptionHandler);
-                    }
-                });
-        Runtime.getRuntime().addShutdownHook(new Thread(workGroup::shutdownGracefully));
-        this.bootstrap = bootstrap;
+        this.bootstrap = new Bootstrap().group(new NioEventLoopGroup())
+            .channel(NioSocketChannel.class)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+            .option(ChannelOption.TCP_NODELAY, true)
+            .option(ChannelOption.SO_KEEPALIVE, true)
+            .option(ChannelOption.SO_RCVBUF, 32 * 1024)
+            .option(ChannelOption.SO_SNDBUF, 32 * 1024)
+            .handler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel ch) {
+                    ChannelPipeline p = ch.pipeline();
+                    // 60s没有服务端数据流入认为连接假死(就是收不到pong)，关闭channel
+                    p.addLast(new ClientIdleHandler(60, 0, 0));
+                    p.addLast(new InputSplitter());
+                    p.addLast(MyMsgCodec.INSTANCE);
+                    p.addLast(heartBeatHandler);
+                    p.addLast(allMsgHandler);
+                    p.addLast(exceptionHandler);
+                }
+            });
     }
 
     // 连接超时时间小于重试时间或者重复调用会引发多次连接
@@ -106,7 +108,7 @@ public class NettyClient {
             log.error("duplicate connecting");
             return;
         }
-        bootstrap.connect(serverIp, serverPort).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(serverIp, serverPort).addListener((ChannelFutureListener)future -> {
             reconnectCount.incrementAndGet();
             if (future.isSuccess()) {
                 log.info("connect done after connect {} times", reconnectCount);
