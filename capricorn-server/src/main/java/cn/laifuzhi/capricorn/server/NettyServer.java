@@ -68,16 +68,13 @@ public class NettyServer {
 
     @PreDestroy
     public void destroy() {
-        Runtime.getRuntime().addShutdownHook(new Thread( serverBootstrap.config().group()::shutdownGracefully));
-        Runtime.getRuntime().addShutdownHook(new Thread( serverBootstrap.config().childGroup()::shutdownGracefully));
-
-
+        Runtime.getRuntime().addShutdownHook(new Thread(serverBootstrap.config().group()::shutdownGracefully));
+        Runtime.getRuntime().addShutdownHook(new Thread(serverBootstrap.config().childGroup()::shutdownGracefully));
     }
 
     public NettyServer() {
         //只监听一个端口，bossGroup只设置一个线程就可以
-        serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group( new NioEventLoopGroup(1), new NioEventLoopGroup())
+        serverBootstrap = new ServerBootstrap().group(new NioEventLoopGroup(1), new NioEventLoopGroup())
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .childOption(ChannelOption.TCP_NODELAY, true)
