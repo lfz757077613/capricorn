@@ -12,5 +12,5 @@
 > 1. netty和spring-boot的搭配使用很优雅
 > 2. 安利一波okhttp，比httpclient好用的多，源码也好看
 > 3. netty的使用很优雅，有很多优化点
-> 4. 其中有很多可以随抄随用的工具类，比如FileWatchdog、DirectMemReporter等
+> 4. 其中有很多可以随抄随用的工具类，比如FileWatchdog、DirectMemReporter等(比如FileWatchdog用jdk8的WatchService比之前的轮训检测配置文件变化更好，待开发)
 > 5. 因为本工程核心框架是netty，所以只使用了spring-boot的基本功能，spring-boot的很多配置都没配，但是一些基础配置还是挺规范的，比如logback的配置，maven和yml多环境的配合
